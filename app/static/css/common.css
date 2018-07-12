@@ -1,0 +1,200 @@
+/** Global **/
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; }
+  body input:focus, body textarea:focus, body button:focus {
+    outline: 0; }
+
+/** Above the Fold **/
+#above_fold {
+  width: 100%;
+  height: 100vh;
+  color: white;
+  background-color: black;
+  position: relative; }
+  #above_fold nav {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    text-align: right; }
+    #above_fold nav .nav_link {
+      display: inline-block;
+      padding: 24px 36px;
+      cursor: pointer; }
+      #above_fold nav .nav_link:last-of-type {
+        padding-right: 72px; }
+    #above_fold nav .nav_underline {
+      background-color: white;
+      height: 1px;
+      position: absolute;
+      right: 0;
+      width: 566px; }
+  #above_fold #svg_holder_top {
+    margin-left: calc(50vw - 600px);
+    margin-right: calc(50vw - 600px);
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 20px;
+    width: 1210px; }
+    #above_fold #svg_holder_top .svg_component {
+      width: 400px;
+      display: inline-block; }
+
+/** Below the Fold **/
+#below_fold {
+  width: 100%;
+  height: 800px;
+  color: black;
+  background-color: white;
+  position: relative; }
+  #below_fold #svg_holder_bottom {
+    margin-left: calc(50vw - 600px);
+    margin-right: calc(50vw - 600px);
+    position: absolute;
+    top: 0;
+    margin-top: 20px;
+    width: 1210px; }
+    #below_fold #svg_holder_bottom .svg_component {
+      width: 400px;
+      display: inline-block; }
+
+/** Footer **/
+footer {
+  width: 100%;
+  height: 300px;
+  color: white;
+  background-color: black; }
+
+/** Concept Page **/
+.body_concept {
+  background-image: url("/static/img/code_bg.png");
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed; }
+  .body_concept nav {
+    text-align: right;
+    float: right; }
+    .body_concept nav .nav_link {
+      cursor: pointer;
+      color: lime;
+      background-color: black;
+      margin: 4px 10px;
+      padding: 6px;
+      font-size: 22px;
+      font-family: 'Asset', cursive; }
+      .body_concept nav .nav_link:hover {
+        letter-spacing: 5px; }
+  .body_concept .card_yellow {
+    border-bottom-color: yellow; }
+  .body_concept .card_red {
+    border-bottom-color: red; }
+  .body_concept .concepts_card {
+    border-bottom-width: 500px;
+    border-bottom-style: solid;
+    border-left: 10px solid transparent;
+    height: 0px;
+    width: 300px;
+    display: inline-block;
+    margin: 50px;
+    -webkit-box-shadow: -10px 10px 0px 0px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: -10px 10px 0px 0px rgba(0, 0, 0, 0.75);
+    box-shadow: -10px 10px 0px 0px rgba(0, 0, 0, 0.75); }
+    .body_concept .concepts_card .concepts_card_inside {
+      margin: 20px;
+      background-color: white;
+      height: 460px;
+      -ms-transform: rotate(-0.5deg);
+      -webkit-transform: rotate(-0.5deg);
+      transform: rotate(-0.5deg);
+      -webkit-box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.75);
+      -moz-box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.75);
+      box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.75); }
+      .body_concept .concepts_card .concepts_card_inside .concepts_card_title {
+        font-family: 'Great Vibes', cursive;
+        padding: 4px;
+        text-align: center;
+        font-size: 20px; }
+      .body_concept .concepts_card .concepts_card_inside .concepts_card_preview {
+        height: 110px;
+        margin: 0 20px;
+        border: 1px solid #CCCCCC; }
+      .body_concept .concepts_card .concepts_card_inside .concepts_card_description {
+        margin: 0 20px;
+        font-family: monospace; }
+
+.body_contact {
+  background-color: #FBFBFB; }
+  .body_contact nav {
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 200;
+    text-align: right;
+    background-color: white;
+    -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    -moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05); }
+    .body_contact nav .nav_link {
+      display: inline-block;
+      padding: 24px 24px;
+      cursor: pointer;
+      color: #888888; }
+      .body_contact nav .nav_link:last-of-type {
+        padding-right: 48px;
+        color: #333333; }
+      .body_contact nav .nav_link:hover {
+        color: #333333; }
+  .body_contact h1 {
+    text-align: center;
+    font-weight: 500;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 40px; }
+  .body_contact form {
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center; }
+    .body_contact form input[type="text"] {
+      width: 300px;
+      height: 30px;
+      padding: 4px 8px;
+      margin: 16px 39px;
+      border: 1px solid #DDDDDD;
+      font-family: 'Source Code Pro', monospace;
+      font-weight: 200;
+      font-size: 18px;
+      color: #555555; }
+      .body_contact form input[type="text"]:last-of-type {
+        width: 698px; }
+      .body_contact form input[type="text"]:focus {
+        border-color: #AAAAAA; }
+    .body_contact form textarea {
+      width: 704px;
+      height: 200px;
+      border: 1px solid #DDDDDD;
+      margin: 16px 39px;
+      font-family: 'Source Code Pro', monospace;
+      font-weight: 200;
+      font-size: 18px;
+      padding: 4px 8px;
+      color: #555555; }
+      .body_contact form textarea:focus {
+        border-color: #AAAAAA; }
+    .body_contact form button {
+      height: 40px;
+      width: 200px;
+      border: 1px solid #DDDDDD;
+      background-color: white;
+      font-family: 'Source Code Pro', monospace;
+      font-weight: 200;
+      font-size: 18px;
+      padding: 4px 8px;
+      color: #555555;
+      cursor: pointer; }
+      .body_contact form button:focus {
+        border-color: #AAAAAA; }
+      .body_contact form button:hover {
+        border-color: #AAAAAA;
+        background-color: #BBBBBB;
+        color: #FFFFFF; }
+
+/*# sourceMappingURL=common.css.map */

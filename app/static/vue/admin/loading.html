@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Admin</title>
+    <link href="https://fonts.googleapis.com/css?family=Martel+Sans:200,400" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/img/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicons/favicon-16x16.png">
+    <link rel="manifest" href="/static/img/favicons/site.webmanifest">
+    <link rel="mask-icon" href="/static/img/favicons/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+      .loading_dialog {
+        font-family: Martel Sans,sans-serif;
+        width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 300px;
+        border: none;
+        padding: 20px;
+        text-align: center;
+        background-color: #b1efc6;
+      }
+      .loading_header {
+        font-weight: 400;
+        display: inline-block;
+        padding: 4px 10px;
+        font-size: 20px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        color: #00b545;
+      }
+      .loading_text {
+        margin-top: 0;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading_dialog">
+        <h1 class="loading_header">Loading...</h1>
+        <p class="loading_text">Creating your session. This will only take a moment.</p>
+    </div>
+    <script>
+      location.assign("/");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,252 @@
+{
+    "Part": {
+        "name": {
+            "type": "string",
+            "label": "Name",
+            "value": "name",
+            "order": 0,
+            "validators": {
+                "required": true
+            }
+        },
+        "part_number": {
+            "type": "string",
+            "label": "Part Number",
+            "value": "part_number",
+            "order": 1
+        },
+        "supplier_list": {
+            "type": "select",
+            "label": "Supplier",
+            "value": "supplier_id",
+            "selectName": "supplier_id",
+            "selects": "supplier_list",
+            "order": 2
+        },
+        "unit_price": {
+            "type": "decimal",
+            "label": "Unit Price",
+            "value": "unit_price",
+            "order": 3
+        },
+        "units_in_stock": {
+            "type": "integer",
+            "label": "Units in Stock",
+            "value": "units_in_stock",
+            "order": 4
+        },
+        "image_name": {
+            "type": "image_name",
+            "label": "Product Image",
+            "value": "image_name",
+            "order": 6
+        },
+        "image": {
+            "type": "image",
+            "label": "Product Image",
+            "value": "image",
+            "order": 6
+        },
+        "categories": {
+            "type": "multiselect",
+            "label": "Categories",
+            "value": "product_category_list",
+            "selectName": "product_categories",
+            "selects": "category_list",
+            "order": 5
+        }
+    },
+    "Transactions": {
+        "sale_product": {
+            "type": "string",
+            "label": "Sale Product",
+            "value": "sale_product",
+            "order": 0,
+            "validators": {
+                "required": true
+            }
+        },
+        "customer_email": {
+            "type": "string",
+            "label": "Customer Email",
+            "value": "customer_email",
+            "order": 1,
+            "validators": {
+                "required": true
+            }
+        },
+        "timestamp_created": {
+            "type": "timestamp",
+            "label": "Timestamp Created",
+            "value": "timestamp_created",
+            "order": 2
+        }
+    },
+    "Supplier": {
+        "name": {
+            "type": "string",
+            "label": "Name",
+            "value": "name",
+            "order": 0,
+            "validators": {
+                "required": true
+            }
+        },
+        "phone": {
+            "type": "string",
+            "label": "Phone",
+            "value": "phone",
+            "order": 1
+        },
+        "address": {
+            "type": "string",
+            "label": "Address",
+            "value": "address",
+            "order": 2
+        },
+        "city": {
+            "type": "string",
+            "label": "City",
+            "value": "city",
+            "order": 3
+        },
+        "state": {
+            "type": "string",
+            "label": "State",
+            "value": "state",
+            "order": 4
+        },
+        "zip_code": {
+            "type": "string",
+            "label": "Zip",
+            "value": "zip_code",
+            "order": 5
+        },
+        "contact_name": {
+            "type": "string",
+            "label": "Contact Name",
+            "value": "contact_name",
+            "order": 6
+        },
+        "contact_title": {
+            "type": "string",
+            "label": "Contact Title",
+            "value": "contact_title",
+            "order": 7
+        },
+        "contact_email": {
+            "type": "string",
+            "label": "Contact Email",
+            "value": "contact_email",
+            "order": 8
+        },
+        "contact_phone": {
+            "type": "string",
+            "label": "Contact Phone",
+            "value": "contact_phone",
+            "order": 9
+        }
+    },
+    "Sales": {
+        "product_name": {
+            "type": "string",
+            "label": "Part Name",
+            "value": "product_name",
+            "order": 1,
+            "validators": {
+                "required": true
+            }
+        },
+        "price": {
+            "type": "decimal",
+            "label": "Price",
+            "value": "price",
+            "order": 2,
+            "validators": {
+                "required": true
+            }
+        },
+        "timestamp_created": {
+            "type": "string",
+            "label": "Sale Created",
+            "value": "timestamp_created",
+            "order": 3
+        },
+        "timestamp_ended": {
+            "type": "string",
+            "label": "Sale Ended",
+            "value": "timestamp_ended",
+            "order": 4
+        }
+    },
+    "Customers": {
+        "first_name": {
+            "type": "string",
+            "label": "First Name",
+            "value": "first_name",
+            "order": 0
+        },
+        "last_name": {
+            "type": "string",
+            "label": "Last Name",
+            "value": "last_name",
+            "order": 1
+        },
+        "address": {
+            "type": "string",
+            "label": "Address",
+            "value": "address",
+            "order": 2
+        },
+        "city": {
+            "type": "string",
+            "label": "City",
+            "value": "city",
+            "order": 3
+        },
+        "state": {
+            "type": "string",
+            "label": "State",
+            "value": "state",
+            "order": 4
+        },
+        "zip_code": {
+            "type": "string",
+            "label": "Zip",
+            "value": "zip_code",
+            "order": 5
+        },
+        "phone": {
+            "type": "string",
+            "label": "Phone",
+            "value": "phone",
+            "order": 6
+        },
+        "email": {
+            "type": "string",
+            "label": "Email",
+            "value": "email",
+            "order": 7,
+            "validators": {
+                "required": true
+            }
+        }
+    },
+    "Categories": {
+        "name": {
+            "type": "string",
+            "label": "Name",
+            "value": "name",
+            "order": 0,
+            "validators": {
+                "required": true
+            }
+        },
+        "description": {
+            "type": "string",
+            "label": "Description",
+            "value": "description",
+            "order": 1
+        }
+    }
+}

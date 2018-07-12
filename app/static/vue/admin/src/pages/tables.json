@@ -1,0 +1,208 @@
+{
+    "Part": {
+        "viewObject": "PartView",
+        "nameValue": "name",
+        "tableKeys": ["id", "name", "part_number", "supplier_name", "unit_price", "units_in_stock", "image_name"],
+        "tableRowNames": ["id", "Name", "Part Number", "Supplier", "Unit Price", "In Stock", "Image"],
+        "saveRoute": "/edit_part/",
+        "selects": [
+            {
+                "name": "sort_by",
+                "label": "Sort By",
+                "selectVals": [
+                    {
+                        "value": "id",
+                        "valueLabel": "ID"
+                    },
+                    {
+                        "value": "alpha",
+                        "valueLabel": "Alpha"
+                    }
+                ]
+            }
+        ],
+        "crudLabel": "Edit",
+        "hasNew": true,
+        "hasEdit": true,
+        "hasDelete": false,
+        "deleteLabel": "",
+        "hasUndelete": false,
+        "undeleteLabel": "",
+        "queryRoute": "/query_parts/"
+    },
+    "Transactions": {
+        "viewObject": "TransactionsView",
+        "nameValue": "sale_product",
+        "tableKeys": ["id", "customer_email", "sale_price", "sale_product"],
+        "tableRowNames": ["id", "Customer Email", "Sale Price", "Product"],
+        "saveRoute": "/edit_transactions/",
+        "selects": [
+            {
+                "name": "sort_by",
+                "label": "Sort By",
+                "selectVals": [
+                    {
+                        "value": "id",
+                        "valueLabel": "ID"
+                    },
+                    {
+                        "value": "alpha",
+                        "valueLabel": "Alpha"
+                    },
+                    {
+                        "value": "date",
+                        "valueLabel": "Most Recent"
+                    }
+                ]
+            }
+        ],
+        "crudLabel": "View",
+        "hasNew": false,
+        "hasEdit": false,
+        "hasDelete": false,
+        "deleteLabel": "",
+        "hasUndelete": false,
+        "undeleteLabel": "",
+        "queryRoute": "/query_transactions/"
+    },
+    "Supplier": {
+        "viewObject": "SupplierView",
+        "nameValue": "name",
+        "tableKeys": ["id", "name", "phone", "address", "city", "state", "zip_code", "contact_name"],
+        "tableRowNames": ["id", "Name", "Phone", "Address", "City", "State", "Zip", "Contact"],
+        "saveRoute": "/edit_supplier/",
+        "selects": [
+            {
+                "name": "sort_by",
+                "label": "Sort By",
+                "selectVals": [
+                    {
+                        "value": "id",
+                        "valueLabel": "ID"
+                    },
+                    {
+                        "value": "alpha",
+                        "valueLabel": "Alpha"
+                    }
+                ]
+            }
+        ],
+        "crudLabel": "Edit",
+        "hasNew": true,
+        "hasEdit": true,
+        "hasDelete": false,
+        "deleteLabel": "",
+        "hasUndelete": false,
+        "undeleteLabel": "",
+        "queryRoute": "/query_suppliers/"
+    },
+    "Sales": {
+        "viewObject": "SaleView",
+        "nameValue": "product_name",
+        "tableKeys": ["id", "product_name", "price", "timestamp_created", "timestamp_ended"],
+        "tableRowNames": ["id", "Part Name", "Price", "Sale Created", "Sale Ended"],
+        "saveRoute": "/edit_sale/",
+        "selects": [
+            {
+                "name": "sort_by",
+                "label": "Sort By",
+                "selectVals": [
+                    {
+                        "value": "id",
+                        "valueLabel": "ID"
+                    },
+                    {
+                        "value": "alpha",
+                        "valueLabel": "Alpha"
+                    },
+                    {
+                        "value": "date",
+                        "valueLabel": "Most Recent"
+                    }
+                ]
+            }
+        ],
+        "checkboxes": [
+            {
+                "name": "active",
+                "label": "Only Active"
+            }
+        ],
+        "crudLabel": "View",
+        "hasNew": true,
+        "hasEdit": false,
+        "hasDelete": true,
+        "deleteLabel": "End Sale",
+        "hasUndelete": false,
+        "undeleteLabel": "",
+        "queryRoute": "/query_sales/"
+    },
+    "Customers": {
+        "viewObject": "CustomerView",
+        "nameValue": "email",
+        "tableKeys": ["id", "email", "first_name", "last_name", "zip_code"],
+        "tableRowNames": ["id", "Email", "First Name", "Last Name", "Zip Code"],
+        "saveRoute": "/edit_customer/",
+        "selects": [
+            {
+                "name": "sort_by",
+                "label": "Sort By",
+                "selectVals": [
+                    {
+                        "value": "id",
+                        "valueLabel": "ID"
+                    },
+                    {
+                        "value": "alpha",
+                        "valueLabel": "Alpha"
+                    }
+                ]
+            }
+        ],
+        "crudLabel": "View",
+        "hasNew": false,
+        "hasEdit": false,
+        "hasDelete": false,
+        "deleteLabel": "",
+        "hasUndelete": false,
+        "undeleteLabel": "",
+        "queryRoute": "/query_customers/"
+    },
+    "Categories": {
+        "viewObject": "CategoryView",
+        "nameValue": "name",
+        "tableKeys": ["id", "name", "description", "timestamp_deleted"],
+        "tableRowNames": ["id", "Name", "Description", "Disabled"],
+        "saveRoute": "/edit_category/",
+        "selects": [
+            {
+                "name": "sort_by",
+                "label": "Sort By",
+                "selectVals": [
+                    {
+                        "value": "id",
+                        "valueLabel": "ID"
+                    },
+                    {
+                        "value": "alpha",
+                        "valueLabel": "Alpha"
+                    }
+                ]
+            }
+        ],
+        "checkboxes": [
+            {
+                "name": "active",
+                "label": "Only Active"
+            }
+        ],
+        "crudLabel": "View",
+        "hasNew": true,
+        "hasEdit": false,
+        "hasDelete": true,
+        "deleteLabel": "Disable",
+        "hasUndelete": true,
+        "undeleteLabel": "Enable",
+        "queryRoute": "/query_categories/"
+    }
+}
