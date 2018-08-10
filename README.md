@@ -4,7 +4,7 @@ This is a project that I did to learn vue.js. It uses Flask/Postgres on the back
 
 ### View Project
 
-The project can be demoed at [my website]("https://admin.devincoty.com/").
+The project can be demoed at [my website](https://admin.devincoty.com/loading/).
 
 ### Model Modifications and Authentication
 
