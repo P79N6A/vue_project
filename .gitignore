@@ -4,5 +4,7 @@ commands
 .sass-cache
 
 settings.py
+wsgi.py
+init_app.py
 
 *.pyc

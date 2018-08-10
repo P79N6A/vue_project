@@ -88,6 +88,13 @@ def create_app(extra_config_settings={}):
         """All routes not defined can reroute to the index for this app."""
         return redirect(url_for("misc.index"))
 
+    @app.teardown_request
+    def teardown_request(exception):
+        """Rollback db errors."""
+        if exception:
+            db.session.rollback()
+        db.session.remove()
+
     from .SessionTablesMixin import SessionTablesMixin
     SessionTablesMixin(app)
 

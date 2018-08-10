@@ -38,7 +38,7 @@ export default {
     data() {
         return {
             showSidebar: true,
-            sidebarMenuItems: ["Home", "Part", "Supplier", "Transactions", "Sales", "Customers", "Categories"],
+            sidebarMenuItems: ["Home", "Transactions", "Supplier", "Part", "Sales", "Customers", "Categories"],
             currentItem: this.$store.state.global.shownView
         }
     },
