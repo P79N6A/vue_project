@@ -165,18 +165,6 @@
             "validators": {
                 "required": true
             }
-        },
-        "timestamp_created": {
-            "type": "string",
-            "label": "Sale Created",
-            "value": "timestamp_created",
-            "order": 3
-        },
-        "timestamp_ended": {
-            "type": "string",
-            "label": "Sale Ended",
-            "value": "timestamp_ended",
-            "order": 4
         }
     },
     "Customers": {

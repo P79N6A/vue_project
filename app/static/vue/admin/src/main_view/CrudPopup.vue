@@ -188,6 +188,7 @@ export default {
     methods: {
         hideCrud: function() {
             this.errors.clear();
+            this.$nextTick(() => this.$validator.reset())
             bus.$emit("hideCrud");
         },
         dirtyDetector: function(event) {
@@ -236,11 +237,14 @@ export default {
         onFileChanged: function(event) {
             let reader = new FileReader();
             let self = this;
+            console.log(event.target);
             let image_element = event.target.previousElementSibling;
 
             reader.addEventListener("load", function() {
                 let fileData = reader.result;
+                console.log("!");
                 if (image_element) {
+                    console.log("@");
                     image_element.src = fileData;
                 }
                 self.modifiedObject["image"] = {
@@ -267,6 +271,7 @@ export default {
 
                 bus.$emit("saveCrud", this.crudData);
                 this.errors.clear();
+                this.$nextTick(() => this.$validator.reset())
             });
         },
         deleteCrud: function(event) {
@@ -383,6 +388,7 @@ export default {
     created() {
         bus.$on("resetValues", () => {
             this.errors.clear();
+            this.$nextTick(() => this.$validator.reset())
 
             // Nasty hack to get around v-validate resetting :value from crudData
             this.$nextTick(function() {

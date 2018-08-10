@@ -32,13 +32,233 @@ class SessionTablesMixin():
 
     def initialize_hooks(self):
         # Request hook for table setup on new user.
-        self.app.before_request(self.table_setup)
+        self.app.before_request(self.table_setup_2)
 
         # Query and join override to add session filter.
         self.db.session.query = self.query_override
 
         # Create event mappers for increment and session_id association.
         self.associate_mappers()
+
+    def table_setup_2(self):
+        if "loading" not in request.path and "id_tracking" not in session:
+            tracking_dict = dict()
+            # Query category and see if any old records exist for this session.
+            last_category_obj = self.db.session.query(
+                Category
+            ).filter_by(
+                session_id=session.sid
+            ).order_by(
+                Category.id.desc()
+            ).first()
+
+            if last_category_obj is None:
+                # For each 'real' table, create copy entries in session tables.
+                # Use raw sql to avoid MetaData namespace conflicts.
+
+                # Categories
+                self.db.session.execute("""
+                    INSERT INTO
+                        "category_session"
+                        (id, name, description, timestamp_deleted, session_id)
+                    SELECT
+                        category.id, category.name, category.description, category.timestamp_deleted, :session_id
+                    FROM
+                        category
+                """, {
+                    "session_id": session.sid
+                })
+
+                self.db.session.commit()
+
+                # Customers
+                self.db.session.execute("""
+                    INSERT INTO
+                        "customer_session"
+                        (id, first_name, last_name, address, city, state, zip_code, phone, email, password_hash, session_id)
+                    SELECT
+                        customer.id, customer.first_name, customer.last_name, customer.address, customer.city, customer.state, customer.zip_code, customer.phone, customer.email, customer.password_hash, :session_id
+                    FROM
+                        customer
+                """, {
+                    "session_id": session.sid
+                })
+
+                self.db.session.commit()
+
+                # Orders
+                self.db.session.execute("""
+                    INSERT INTO
+                        "order_session"
+                        (id, sale_id, customer_id, timestamp_created, session_id)
+                    SELECT
+                        "order".id, "order".sale_id, "order".customer_id, "order".timestamp_created, :session_id
+                    FROM
+                        "order"
+                """, {
+                    "session_id": session.sid
+                })
+
+                self.db.session.commit()
+
+                # Products
+                self.db.session.execute("""
+                    INSERT INTO
+                        "product_session"
+                        (id, name, supplier_id, units_in_stock, unit_price, part_number, image_name, image, session_id)
+                    SELECT
+                        product.id, product.name, product.supplier_id, product.units_in_stock, product.unit_price, product.part_number, product.image_name, product.image, :session_id
+                    FROM
+                        product
+                """, {
+                    "session_id": session.sid
+                })
+
+                self.db.session.commit()
+
+                # Product Categories
+                self.db.session.execute("""
+                    INSERT INTO
+                        "product_category_session"
+                        (id, category_id, product_id, session_id)
+                    SELECT
+                        product_category.id, product_category.category_id, product_category.product_id, :session_id
+                    FROM
+                        product_category
+                """, {
+                    "session_id": session.sid
+                })
+
+                self.db.session.commit()
+
+                # Reviews
+                self.db.session.execute("""
+                    INSERT INTO
+                        "review_session"
+                        (id, customer_id, product_id, rating, review, timestamp_created, shown, session_id)
+                    SELECT
+                        review.id, review.customer_id, review.product_id, review.rating, review.review, review.timestamp_created, review.shown, :session_id
+                    FROM
+                        review
+                """, {
+                    "session_id": session.sid
+                })
+
+                self.db.session.commit()
+
+                # Sales
+                self.db.session.execute("""
+                    INSERT INTO
+                        "sale_session"
+                        (id, product_id, price, timestamp_created, timestamp_ended, session_id)
+                    SELECT
+                        sale.id, sale.product_id, sale.price, sale.timestamp_created, sale.timestamp_ended, :session_id
+                    FROM
+                        sale
+                """, {
+                    "session_id": session.sid
+                })
+
+                self.db.session.commit()
+
+                # Suppliers
+                self.db.session.execute("""
+                    INSERT INTO
+                        "supplier_session"
+                        (id, name, contact_name, contact_title, address, city, zip_code, state, phone, contact_phone, contact_email, session_id)
+                    SELECT
+                        supplier.id, supplier.name, supplier.contact_name, supplier.contact_title, supplier.address, supplier.city, supplier.zip_code, supplier.state, supplier.phone, supplier.contact_phone, supplier.contact_email, :session_id
+                    FROM
+                        supplier
+                """, {
+                    "session_id": session.sid
+                })
+
+                self.db.session.commit()
+
+            # Populate tracking dictionary
+
+            # Categories
+            last_obj = self.db.session.query(
+                Category
+            ).filter_by(
+                session_id=session.sid
+            ).order_by(
+                Category.id.desc()
+            ).first()
+            tracking_dict["category_session"] = last_obj.id
+
+            # Customers
+            last_obj = self.db.session.query(
+                Customer
+            ).filter_by(
+                session_id=session.sid
+            ).order_by(
+                Customer.id.desc()
+            ).first()
+            tracking_dict["customer_session"] = last_obj.id
+
+            # Orders
+            last_obj = self.db.session.query(
+                Order
+            ).filter_by(
+                session_id=session.sid
+            ).order_by(
+                Order.id.desc()
+            ).first()
+            tracking_dict["order_session"] = last_obj.id
+
+            # Products
+            last_obj = self.db.session.query(
+                Product
+            ).filter_by(
+                session_id=session.sid
+            ).order_by(
+                Product.id.desc()
+            ).first()
+            tracking_dict["product_session"] = last_obj.id
+
+            # Product Categories
+            last_obj = self.db.session.query(
+                ProductCategory
+            ).filter_by(
+                session_id=session.sid
+            ).order_by(
+                ProductCategory.id.desc()
+            ).first()
+            tracking_dict["product_category_session"] = last_obj.id
+
+            # Reviews
+            last_obj = self.db.session.query(
+                Review
+            ).filter_by(
+                session_id=session.sid
+            ).order_by(
+                Review.id.desc()
+            ).first()
+            tracking_dict["review_session"] = last_obj.id
+
+            # Sales
+            last_obj = self.db.session.query(
+                Sale
+            ).filter_by(
+                session_id=session.sid
+            ).order_by(
+                Sale.id.desc()
+            ).first()
+            tracking_dict["sale_session"] = last_obj.id
+
+            # Suppliers
+            last_obj = self.db.session.query(
+                Supplier
+            ).filter_by(
+                session_id=session.sid
+            ).order_by(
+                Supplier.id.desc()
+            ).first()
+            tracking_dict["supplier_session"] = last_obj.id
+
+            session["id_tracking"] = tracking_dict
 
     def table_setup(self):
         if "loading" not in request.path and "id_tracking" not in session:

@@ -348,8 +348,7 @@ export default {
                     this.$store.commit("pushCrud", crudObject);
                 }
             }).catch((error) => {
-                this.$store.commit("setWarningText", error.response.data);
-                bus.$emit("showWarning");
+                bus.$emit("showWarning", error.response.data);
             }).finally(() => {
                 bus.$emit("hideLoading");
             });

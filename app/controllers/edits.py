@@ -378,7 +378,7 @@ def edit_sale():
     ).filter(
         Sale.product_id == sale_obj.product_id,
         Sale.id != sale_obj.id,
-        Sale.timestamp_ended is None
+        Sale.timestamp_ended == None
     ).all()
 
     for ind_sale in existing_sales:
