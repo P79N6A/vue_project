@@ -19,15 +19,11 @@
                 </thead>
                 <tbody>
                     <tr v-for="row in this.reviewData">
-                        <td class="table-row__table-data">{{ row.id }}</td>
-                        <td class="table-row__table-data">{{ row.product_name }}</td>
-                        <td class="table-row__table-data">{{ row.customer_email }}</td>
-                        <td class="table-row__table-data">{{ row.rating }}</td>
-                        <td class="table-row__table-data">{{ row.review_truncated }}</td>
+                        <td v-for="column in row" class="table-row__table-data">{{ column }}</td>
                     </tr>
                 </tbody>
             </table>
-            <button @click="changeView('Part')" class="table-row__button">
+            <button @click="changeView('Parts')" class="table-row__button">
                 View Products
             </button>
         </div>
@@ -43,9 +39,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="row in this.saleData">
-                        <td class="table-row__table-data">{{ row.id }}</td>
-                        <td class="table-row__table-data">{{ row.product_name }}</td>
-                        <td class="table-row__table-data">{{ row.price }}</td>
+                        <td v-for="column in row" class="table-row__table-data">{{ column }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -84,16 +78,12 @@
 
 <script>
 import axios from "../../node_modules/axios"
-//import html2canvas from "html2canvas"
-//import jsPDF from "jspdf"
 
 import { bus } from "../main"
 
 import CustomersChart from "../charts/CustomersChart.js"
 import OrdersChart from "../charts/OrdersChart.js"
 import RevenueChart from "../charts/RevenueChart.js"
-
-//window.html2canvas = html2canvas;
 
 export default {
     components: {
@@ -113,152 +103,35 @@ export default {
     methods: {
         changeView: function(destinationView) {
             bus.$emit("changeSidebarView", destinationView);
+        },
+        sortRows: function(tableData, dataType) {
+            let resultsArray = [];
+            for (var i=0; i<tableData.length; i++) {
+                resultsArray.push(this.sortTableRow(tableData[i], dataType));
+            }
+
+            return resultsArray;
+        },
+        sortTableRow: function(rowData, dataType) {
+            let returnList = [];
+            if (dataType === "Reviews") {
+                returnList.push(rowData["id"]["value"]);
+                returnList.push(rowData["product_name"]["value"]);
+                returnList.push(rowData["customer_email"]["value"]);
+                returnList.push(rowData["rating"]["value"]);
+                returnList.push(rowData["review"]["value"]);
+            } else {
+                returnList.push(rowData["id"]["value"]);
+                returnList.push(rowData["name"]["value"]);
+                returnList.push(rowData["price"]["value"]);
+            }
+
+            return returnList;
         }
-        // Everything related to reports is commented out for now.
-        // Removing the imports + code reduces file and compilation time by ~50%.
-        // Ideally, this will be added back in once I find a solution to correctly
-        // displaying HTML or I find a module where the default tables look acceptable.
-        /**
-        showReports: function() {
-            this.reportsPopup = true;
-        },
-        hideReports: function() {
-            this.reportsPopup = false;
-        },
-        setReport: function(reportName) {
-            this.currentReport = reportName;
-        },
-        generateReport: function() {
-            this.preview = null;
-
-            if (this.currentReport === "sales") {
-                this.generateSalesReport();
-            } else if (this.currentReport === "transactions") {
-                this.generateTransactionsReport();
-            }
-        },
-        generateReportHTML: function(reportName, tableRows, headerList, attribList) {
-            let source = document.createElement("DIV");
-            source.style.height = "700px";
-            source.style.width = "500px";
-            source.style.backgroundColor = "black";
-
-            let headerDiv = document.createElement("DIV");
-            headerDiv.style.backgroundColor = "#00B545";
-            headerDiv.style.color = "#FF0000";
-            headerDiv.style.padding = "5px";
-            headerDiv.style.textAlign = "center";
-            headerDiv.style.fontSize = "24";
-            headerDiv.style.width = "300px";
-            let headerText = document.createTextNode(reportName);
-            headerDiv.appendChild(headerText);
-
-            let tableDiv = document.createElement("DIV");
-            let table = document.createElement("TABLE");
-            let headerRow = document.createElement("TR");
-            for (var i=0; i<headerList.length; i++) {
-                let currentHeader = headerList[i];
-                let textNode = document.createTextNode(currentHeader);
-                let headerNode = document.createElement("TH");
-                headerNode.appendChild(textNode);
-                headerRow.appendChild(headerNode);
-            }
-            table.appendChild(headerRow);
-
-            for (var i=0; i<tableRows.length; i++) {
-                let currentRow = tableRows[i];
-                let rowNode = document.createElement("TR");
-                for (var j=0; j<attribList.length; j++) {
-                    let currentAttrib = attribList[j];
-                    let textNode = document.createTextNode(currentRow[currentAttrib]);
-                    let tdNode = document.createElement("TD");
-                    tdNode.appendChild(textNode);
-                    rowNode.appendChild(tdNode);
-                }
-                table.appendChild(rowNode);
-            }
-
-            tableDiv.appendChild(table);
-
-            source.appendChild(headerDiv);
-            source.appendChild(tableDiv);
-
-            return source;
-        },
-        generateSalesReport: function() {
-            bus.$emit("showLoading", "Contacting Server");
-            axios.post("/query_sales/", {
-                query: {
-                    "search": "",
-                    "sort_by": "date",
-                    "offset": "0",
-                    "limit": "10",
-                    "active": true
-                }
-            }).then((response) => {
-                let tableRows = response["data"]["result"]["query_result"];
-
-                let doc = new jsPDF();
-
-                let source = this.generateReportHTML(
-                    "Sales",
-                    tableRows,
-                    ["ID", "Product", "Price"],
-                    ["id", "product_name", "price"]
-                );
-
-                doc.addHTML(
-                    source,
-                    15,
-                    15
-                )
-
-                this.preview = doc.output("datauristring");
-            }).catch((error) => {
-                bus.$emit("showWarning", error.response.data);
-            }).finally(() => {
-                bus.$emit("hideLoading");
-            });
-        },
-        generateTransactionsReport: function() {
-            bus.$emit("showLoading", "Contacting Server");
-            axios.post("/query_transactions/", {
-                query: {
-                    "search": "",
-                    "sort_by": "date",
-                    "offset": "0",
-                    "limit": "10",
-                    "active": true
-                }
-            }).then((response) => {
-                let tableRows = response["data"]["result"]["query_result"];
-
-                let doc = new jsPDF();
-
-                let source = this.generateReportHTML(
-                    "Transactions",
-                    tableRows,
-                    ["ID", "Sale Product", "Sale Price"],
-                    ["id", "sale_product", "sale_price"]
-                );
-
-                doc.addHTML(
-                    source,
-                    15,
-                    15
-                )
-
-                this.preview = doc.output("datauristring");
-            }).catch((error) => {
-                bus.$emit("showWarning", error.response.data);
-            }).finally(() => {
-                bus.$emit("hideLoading");
-            });
-        }
-        **/
     },
     created() {
         bus.$emit("showLoading", "Contacting Server");
+
         let reviewQuery = axios.post("/query_reviews/", {
             query: {
                 "sort_by": "date",
@@ -278,14 +151,22 @@ export default {
         Promise.all(
             [reviewQuery, salesQuery]
         ).then((response) => {
-            this.reviewData = response[0]["data"]["result"]["query_result"];
-            this.saleData = response[1]["data"]["result"]["query_result"];
+            let response0 = response[0]["data"]["result"]["query_result"];
+            let response1 = response[1]["data"]["result"]["query_result"];
+            this.reviewData = this.sortRows(
+                response0,
+                "Reviews"
+            );
+            this.saleData = this.sortRows(
+                response1,
+                "Sales"
+            );
         }).catch((error) => {
             bus.$emit("showWarning", error.response.data);
         }).finally(() => {
             bus.$emit("hideLoading");
         });
-}
+    }
 }
 </script>
 

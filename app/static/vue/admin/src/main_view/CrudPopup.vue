@@ -13,109 +13,112 @@
             <span class="crud-popup__error" v-if="errors.any()">
                 {{ errors.all()[0] }}
             </span>
+            <span class="crud-popup__error">
+                Saving is disabled in demo mode.
+            </span>
             <div v-for="currentField in fieldOrder" class="crud-popup__form-group">
-                <template v-if="crudData['fields'][currentField].type === 'string'">
+                <template v-if="crudData[currentField].type === 'string' && currentField !== 'image' && currentField !== 'image_name'">
                     <label class="crud-popup__form-group-label">
-                        {{ crudData["fields"][currentField].label }}
+                        {{ crudData[currentField].label }}
                     </label>
                     <input 
                         type="text" 
                         class="crud-popup__form-group-input" 
                         :name="currentField" 
-                        :data-original="crudData['fields'][currentField].value" 
+                        :data-original="crudData[currentField].value" 
                         @keyup="dirtyDetector" 
                         autocomplete="off" 
-                        v-validate.disable="{required: isRequired(crudData['fields'][currentField])}"
-                        :class="{ dirty: crudData['fields'][currentField].dirty }"  
+                        v-validate.disable="{required: isRequired(crudData[currentField])}"
+                        :class="{ dirty: crudData[currentField].dirty }"  
                     />
                 </template>
-                <template v-if="crudData['fields'][currentField].type === 'timestamp'">
+                <template v-if="crudData[currentField].type === 'timestamp'">
                     <label class="crud-popup__form-group-label">
-                        {{ crudData["fields"][currentField].label }}
+                        {{ crudData[currentField].label }}
                     </label>
                     <input 
                         type="text" 
                         class="crud-popup__form-group-input" 
                         :name="currentField" 
-                        :data-original="crudData['fields'][currentField].value" 
+                        :data-original="crudData[currentField].value" 
                         @keyup="dirtyDetector" 
                         autocomplete="off" 
-                        v-validate.disable="{required: isRequired(crudData['fields'][currentField])}" 
-                        :class="{ dirty: crudData['fields'][currentField].dirty }" 
+                        v-validate.disable="{required: isRequired(crudData[currentField])}" 
+                        :class="{ dirty: crudData[currentField].dirty }" 
                     />
                 </template>
-                <template v-else-if="crudData['fields'][currentField].type === 'integer'">
+                <template v-else-if="crudData[currentField].type === 'integer'">
                     <label class="crud-popup__form-group-label">
-                        {{ crudData["fields"][currentField].label }}
+                        {{ crudData[currentField].label }}
                     </label>
                     <input 
                         type="text" 
                         class="crud-popup__form-group-input" 
                         :name="currentField" 
-                        :data-original="crudData['fields'][currentField].value" 
+                        :data-original="crudData[currentField].value" 
                         @keyup="dirtyDetector" 
                         autocomplete="off" 
-                        v-validate.disable="{required: isRequired(crudData['fields'][currentField])}" 
-                        :class="{ dirty: crudData['fields'][currentField].dirty }" 
+                        v-validate.disable="{required: isRequired(crudData[currentField])}" 
+                        :class="{ dirty: crudData[currentField].dirty }" 
                     />
                 </template>
-                <template v-else-if="crudData['fields'][currentField].type === 'decimal'">
+                <template v-else-if="crudData[currentField].type === 'decimal'">
                     <label class="crud-popup__form-group-label">
-                        {{ crudData["fields"][currentField].label }}
+                        {{ crudData[currentField].label }}
                     </label>
                     <input 
                         type="text" 
                         class="crud-popup__form-group-input" 
                         :name="currentField" 
-                        :data-original="crudData['fields'][currentField].value" 
+                        :data-original="crudData[currentField].value" 
                         @keyup="dirtyDetector" 
                         autocomplete="off" 
-                        v-validate.disable="{required: isRequired(crudData['fields'][currentField])}" 
-                        :class="{ dirty: crudData['fields'][currentField].dirty }" 
+                        v-validate.disable="{required: isRequired(crudData[currentField])}" 
+                        :class="{ dirty: crudData[currentField].dirty }" 
                     />
                 </template>
-                <template v-else-if="crudData['fields'][currentField].type === 'select'">
+                <template v-else-if="crudData[currentField].type === 'select'">
                     <label class="crud-popup__form-group-label">
-                        {{ crudData["fields"][currentField].label }}
+                        {{ crudData[currentField].label }}
                     </label>
                     <select 
-                        :name="crudData['fields'][currentField].selectName" 
-                        :data-original="crudData['fields'][currentField].value" 
+                        :name="crudData[currentField].selectName" 
+                        :data-original="crudData[currentField].value" 
                         @change="dirtyDetector" 
                         class="crud-popup__form-group-select" 
-                        v-validate.disable="{required: isRequired(crudData['fields'][currentField])}" 
-                        :class="{ dirty: crudData['fields'][currentField].dirty }" 
+                        v-validate.disable="{required: isRequired(crudData[currentField])}" 
+                        :class="{ dirty: crudData[currentField].dirty }" 
                     >
-                        <option v-for="crudOption in crudData['fields'][currentField].selects" :value="crudOption[0]">
+                        <option v-for="crudOption in crudData[currentField].selects" :value="crudOption[0]">
                             {{ crudOption[1] }}
                         </option>
                     </select>
                 </template>
-                <template v-else-if="crudData['fields'][currentField].type === 'multiselect'">
+                <template v-else-if="crudData[currentField].type === 'multiselect'">
                     <label class="crud-popup__form-group-label crud-popup__form-group-label--multiselect">
-                        {{ crudData["fields"][currentField].label }}
+                        {{ crudData[currentField].label }}
                     </label>
                     <select 
-                        :name="crudData['fields'][currentField].selectName" 
+                        :name="crudData[currentField].selectName" 
                         class="crud-popup__form-group-select" 
                         @change="dirtyDetector" 
-                        v-model="crudData['fields'][currentField].value" 
+                        v-model="crudData[currentField].value" 
                         multiple 
-                        v-validate.disable="{required: isRequired(crudData['fields'][currentField])}" 
-                        :class="{ dirty: crudData['fields'][currentField].dirty }" 
+                        v-validate.disable="{required: isRequired(crudData[currentField])}" 
+                        :class="{ dirty: crudData[currentField].dirty }" 
                     >
-                        <option v-for="crudOption in crudData['fields'][currentField].selects" :value="crudOption[0]">
+                        <option v-for="crudOption in crudData[currentField].selects" :value="crudOption[0]">
                             {{ crudOption[1] }}
                         </option>
                     </select>
                 </template>
-                <template v-else-if="crudData['fields'][currentField].type === 'image_name'">
+                <template v-else-if="crudData[currentField].type === 'string' && currentField === 'image_name'">
                     <p class="crud-popup__image-name">
-                        {{ crudData["fields"][currentField].value }}
+                        {{ crudData[currentField].value }}
                     </p>
                 </template>
-                <template v-else-if="crudData['fields'][currentField].type === 'image'">
-                    <img v-if="crudData['fields'][currentField].value" :src="crudData['fields'][currentField].value" class="crud-popup__image" alt="product image" />
+                <template v-else-if="crudData[currentField].type === 'string' && currentField === 'image'">
+                    <img v-if="crudData[currentField].value" :src="crudData[currentField].value" class="crud-popup__image" alt="product image" />
                     <input 
                         type="file" 
                         @change="onFileChanged" 
@@ -131,7 +134,7 @@
                 </template>
             </div>
             <div class="crud-popup__form-group" v-if="showSave">
-                <button type="button" @click="saveCrud" class="crud-popup__button">
+                <button type="button" @click="saveCrud" disabled class="crud-popup__button">
                     Save
                 </button>
             </div>
@@ -220,16 +223,16 @@ export default {
         },
         updateDirtyFields: function() {
             // Iterates through and sets the .dirty attribute on modified data for conditional classes.
-            for (var field in this.crudData.fields) {
-                if (this.crudData.fields.hasOwnProperty(field)) {
+            for (var field in this.crudData) {
+                if (this.crudData.hasOwnProperty(field)) {
                     let name = field;
-                    if (this.crudData.fields[field].hasOwnProperty("selectName")) {
-                        name = this.crudData.fields[field].selectName;
+                    if (this.crudData[field].hasOwnProperty("selectName")) {
+                        name = this.crudData[field].selectName;
                     }
                     if (this.modifiedObject.hasOwnProperty(name)) {
-                        this.crudData.fields[field].dirty = true;
+                        this.crudData[field].dirty = true;
                     } else {
-                        this.crudData.fields[field].dirty = false;
+                        this.crudData[field].dirty = false;
                     }
                 }
             }
@@ -258,6 +261,7 @@ export default {
             }
         },
         saveCrud: function(event) {
+            /*
             this.$validator.validateAll().then(result => {
                 if (this.errors.any()) {
                     return;
@@ -273,8 +277,10 @@ export default {
                 this.errors.clear();
                 this.$nextTick(() => this.$validator.reset())
             });
+            */
         },
         deleteCrud: function(event) {
+            /*
             // "delete" parameter that is eventually passed as a POST argument is
             // to be interpreted by the flask route and handled according to the
             // model. Most deletes are soft.
@@ -286,8 +292,10 @@ export default {
             } else {
                 bus.$emit("hideCrud");
             }
+            */
         },
         undeleteCrud: function(event) {
+            /*
             // Toggles soft delete. "delete" property is handled on server side
             // according to the object being modified.
             if (this.crudData.hasOwnProperty("id")) {
@@ -298,8 +306,10 @@ export default {
             } else {
                 bus.$emit("hideCrud");
             }
+            */
         },
         toggleReview: function(row, event) {
+            /*
             // This is done async and doesn't wait for a save.
             let rowId = row.id;
 
@@ -313,13 +323,19 @@ export default {
             }).finally(() => {
                 bus.$emit("hideLoading");
             });
+            */
         },
         isRequired: function(rowInfo) {
+
+            return false;
+
+            /*
             if (rowInfo.hasOwnProperty("validators") && rowInfo.validators.hasOwnProperty("required") && rowInfo.validators.required === true) {
                 return true;
             } else {
                 return false;
             }
+            */
         }
     },
     computed: {
@@ -327,14 +343,16 @@ export default {
             // Sets the fieldOrder array based off of the schema json.
             // This does lead to long dictionary calls in the template, however.
             // Future versions of the data structure will probably avoid this.
-            if (this.crudData === null || this.crudData === undefined) {
+            let tempData = this.crudData;
+            if (tempData === null || tempData === undefined) {
                 return [];
             } else {
                 let resultsArray = Object.keys(
-                    this.crudData.fields
+                    tempData
                 ).sort(function(a, b) {
-                    return b.order > a.order;
+                    return tempData[a].order - tempData[b].order;
                 });
+
                 return resultsArray;
             }
         },
@@ -345,6 +363,11 @@ export default {
             return this.crudData.hasOwnProperty("id") && this.crudData["id"] !== null;
         },
         showSave: function() {
+
+
+            return true;
+
+
             if (this.crudData !== null) {
                 return (this.crudData.hasOwnProperty("id") && this.crudData["id"] !== null && this.$store.state.global.hasEdit === true) || ((!this.crudData.hasOwnProperty("id") || this.crudData["id"] === null) && this.$store.state.table.hasNew === true)
             } else {
@@ -352,6 +375,11 @@ export default {
             }
         },
         showDelete: function() {
+            
+
+            return false;
+            
+
             if (this.crudData !== null && this.$store.state.global.hasDelete && this.crudData.id && this.crudData.id !== null) {
                 if (this.crudData.viewObject === "CategoryView" && this.crudData.tableRowValues[3] === "") {
                     return true;
@@ -364,6 +392,11 @@ export default {
             return false;
         },
         showUndelete: function() {
+        
+
+            return false;
+
+
             if (this.crudData !== null && this.$store.state.global.hasUndelete && !this.showDelete && this.crudData.id && this.crudData.id !== null) {
                 return true;
             } else {
@@ -374,7 +407,7 @@ export default {
     filters: {
         ifExists: function(base, value) {
             try {
-                return base[value] === null && value === "name" ? "New" : base[value];
+                return base[value] === null && value === "name" ? "New" : base[value]["value"];
             } catch(err) {
                 return "New";
             }
@@ -395,9 +428,9 @@ export default {
                 try {
                     let currentForm = document.getElementById("crud_form");
                     let nameObj = {};
-                    for (var field in this.crudData.fields) {
-                        if (this.crudData.fields[field].hasOwnProperty("selectName")) {
-                            nameObj[this.crudData.fields[field].selectName] = field;
+                    for (var field in this.crudData) {
+                        if (this.crudData[field].hasOwnProperty("selectName")) {
+                            nameObj[this.crudData[field].selectName] = field;
                         } else {
                             nameObj[field] = field;
                         }
@@ -406,7 +439,7 @@ export default {
                     for (var i=0; i<currentForm.length; i++) {
                         let currentInput = currentForm[i];
                         if (nameObj.hasOwnProperty(currentInput.name)) {
-                            let currentField = this.crudData.fields[nameObj[currentInput.name]];
+                            let currentField = this.crudData[nameObj[currentInput.name]];
                             if (currentField.type !== "multiselect") {
                                 if (this.crudData.id !== null) {
                                     currentInput.value = currentField.value;

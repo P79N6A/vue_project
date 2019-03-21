@@ -1,4 +1,4 @@
-import Vue from "vue"
+import Vue from "vue/dist/vue.js"
 import Router from "vue-router"
 import Login from "../pages/Login"
 import Dashboard from "../pages/Dashboard"

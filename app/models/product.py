@@ -13,7 +13,7 @@ from admin.app.models.product_category import ProductCategory
 class Product(db.Model):
     """Product Class"""
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
+    name = db.Column(db.String(255), nullable=False)
     supplier_id = db.Column(db.Integer)
     units_in_stock = db.Column(db.Integer)
     unit_price = db.Column(db.Numeric)

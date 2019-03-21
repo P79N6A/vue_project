@@ -1,5 +1,6 @@
 var path = require('path')
 var webpack = require('webpack')
+const OfflinePlugin = require('offline-plugin');
 
 module.exports = {
   entry: './src/main.js',
@@ -51,12 +52,13 @@ module.exports = {
               'css-loader',
               'sass-loader?indentedSyntax'
             ]
-          }
+          },
           // other vue-loader options go here
+          optimizeSSR: false
         }
       },
       {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         loader: 'babel-loader',
         exclude: /node_modules/
       },
@@ -71,7 +73,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      'vue$': 'vue/dist/vue.esm.js'
+      "vue$": 'vue/dist/vue.esm.js'
     },
     extensions: ['*', '.js', '.vue', '.json']
   },
@@ -83,10 +85,12 @@ module.exports = {
   performance: {
     hints: false
   },
-  devtool: '#eval-source-map'
+  devtool: 'inline-cheap-module-source-map',
+  target: "web"
 }
 
 if (process.env.NODE_ENV === 'production') {
+  //require('offline-plugin/runtime').install();
   module.exports.devtool = '#source-map'
   // http://vue-loader.vuejs.org/en/workflow/production.html
   module.exports.plugins = (module.exports.plugins || []).concat([
@@ -95,14 +99,35 @@ if (process.env.NODE_ENV === 'production') {
         NODE_ENV: '"production"'
       }
     }),
+    /*
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: true,
       compress: {
         warnings: false
       }
     }),
+    */
     new webpack.LoaderOptionsPlugin({
       minimize: true
+    }),
+    new OfflinePlugin({
+      caches: 'all',
+      AppCache: false,
+      ServiceWorker: {
+        minify: false
+      }
     })
   ])
 }
+/*
+if (process.env.NODE_ENV === "test") {
+  module.exports.target = "node"
+  module.exports.externals = [require("webpack-node-externals")()]
+  module.exports.devtool = "inline-cheap-module-source-map"
+  module.exports.output = {
+    devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+    devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
+  }
+  module.exports.entry = './src/index.html'
+}
+*/

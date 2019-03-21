@@ -1,5 +1,5 @@
 <template>
-    <ul>
+    <ul id="app" class="app">
         <li v-for="test in tests">{{ test }}</li>
     </ul>
 </template>

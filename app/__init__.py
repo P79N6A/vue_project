@@ -11,7 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 import flask_login
 from flask_session import Session
 
-db = SQLAlchemy()
+from admin.app.models import db
 sess = Session()
 
 
@@ -36,6 +36,7 @@ def create_app(extra_config_settings={}):
     app.session_interface.db.create_all()
 
     # Handle auth.
+    '''
     from app.models import Employee
     from flask_login import LoginManager, user_logged_in, user_logged_out
     login_manager = LoginManager()
@@ -73,6 +74,7 @@ def create_app(extra_config_settings={}):
     def unauthorized_user():
         """Take unauthorized users to /login/."""
         return redirect("/login/")
+    '''
 
     # Register blueprints.
     from app.controllers.misc import misc_blueprint
@@ -88,6 +90,12 @@ def create_app(extra_config_settings={}):
         """All routes not defined can reroute to the index for this app."""
         return redirect(url_for("misc.index"))
 
+    @app.errorhandler(500)
+    def server_error(error):
+        """Rollback db"""
+        db.session.rollback()
+        return redirect(url_for("misc.index"))
+
     @app.teardown_request
     def teardown_request(exception):
         """Rollback db errors."""
@@ -95,8 +103,8 @@ def create_app(extra_config_settings={}):
             db.session.rollback()
         db.session.remove()
 
-    from .SessionTablesMixin import SessionTablesMixin
-    SessionTablesMixin(app)
+    #from .SessionTablesMixin import SessionTablesMixin
+    #SessionTablesMixin(app)
 
     # Handle error logging
     if not app.debug:

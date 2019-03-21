@@ -38,7 +38,7 @@ export default {
     data() {
         return {
             showSidebar: true,
-            sidebarMenuItems: ["Home", "Transactions", "Supplier", "Part", "Sales", "Customers", "Categories"],
+            sidebarMenuItems: ["Home", "Transactions", "Suppliers", "Parts", "Sales", "Customers", "Categories"],
             currentItem: this.$store.state.global.shownView
         }
     },
@@ -47,7 +47,7 @@ export default {
             bus.$emit("showSettings");
         },
         toggleAccount: function(event) {
-            bus.$emit("showAccount");
+            //bus.$emit("showAccount");
         },
         changeMainView: function(menuItem) {
             bus.$emit("mainViewChange", menuItem);

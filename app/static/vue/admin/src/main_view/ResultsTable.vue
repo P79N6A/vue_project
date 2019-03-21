@@ -1,15 +1,17 @@
 <template>
     <div class="results-table">
+        <!--
         <button 
-            v-if="this.$store.state.table.hasNew === true" 
+            v-if="hasNew === true" 
             @click="showEmptyCrud" 
             class="results-table__button"
         >New</button>
+        -->
         <table class="results-table__table">
             <thead>
                 <tr>
                     <th 
-                        v-for="header in this.$store.state.table.tableRowNames" 
+                        v-for="header in tableHeaders" 
                         class="results-table__table-cell results-table__table-cell--columnHead"
                     >{{ header }}</th>
                     <th class="results-table__table-cell results-table__table-cell--columnHead"></th>
@@ -17,18 +19,18 @@
             </thead>
             <tbody>
                 <tr 
-                    v-for="rowArray in this.$store.state.table.crudList" 
+                    v-for="(rowArray, rowIndex) in tableRows" 
                     class="results-table__table-row"
                     :class="{ dirty: isDirty(rowArray) }"
                 >
                     <td 
-                        v-for="tableData in rowArray.tableRowValues" 
+                        v-for="tableData in rowArray" 
                         class="results-table__table-cell"
                     >{{ tableData }}</td>
                     <td class="results-table__table-cell">
                         <button 
-                            @click="showCrud(rowArray)" 
                             class="results-table__button-cell"
+                            @click="showCrud(rowIndex)" 
                         >{{ crudLabel }}</button>
                     </td>
                 </tr>
@@ -64,62 +66,144 @@ export default {
                 bus.$emit("showCrud");
             });
         },
-        showCrud: function(rowArray) {
-            bus.$emit("popCrud", rowArray);
+        showCrud: function(rowIndex) {
+            bus.$emit("popCrud", this.$store.state.data.currentTable.result[rowIndex]);
             bus.$emit("showCrud");
         },
         previous: function() {
-            if (this.$store.state.query.hasPrev) {
+            if (this.$store.state.data.currentTable.hasPrev) {
                 this.$store.commit("setQueryOffset", this.$store.state.query.queryOffset - 1);
                 bus.$emit("runQuery");
             }
         },
         next: function() {
-            if (this.$store.state.query.hasNext) {
+            if (this.$store.state.data.currentTable.hasNext) {
                 this.$store.commit("setQueryOffset", this.$store.state.query.queryOffset + 1);
                 bus.$emit("runQuery");
             }
         },
         isDirty: function(rowArray) {
+            // ! NEED TO FIX !
+
+            return false;
+
+
             return rowArray.hasOwnProperty("isDirty") && rowArray.isDirty === true;
+        },
+        sortTableRows: function(firstItem) {
+            // Returns sorted list of properties from supplied item
+            let sortedIndexes = Object.keys(
+                    firstItem
+            ).sort(function(a, b) {
+                return firstItem[a]["order"] - firstItem[b]["order"];
+            });
+
+            let filteredIndexes = sortedIndexes.filter(function(currentValue) {
+                return !(
+                    [
+                        "timestamp_deleted",
+                        "address",
+                        "zip_code",
+                        "image",
+                        "product_category_list",
+                        "supplier_id",
+                        "image_name",
+                        "phone"
+                    ].includes(currentValue)
+                );
+            });
+
+            return filteredIndexes;
         }
     },
     computed: {
-        tableHeaders: function() {
-            if (this.resultsData === null || this.resultsData === undefined) {
-                return [];
-            } else {
-                let resultsArray = Object.keys(this.resultsData[0]);
-
-                return resultsArray;
-            }
-        },
-        tableArray: function() {
-            if (this.resultsData === null || this.resultsData === undefined) {
-                return [];
-            } else {
-                // Uses this.tableHeaders as keys for each row in this.resultsData
-                let resultsArray = []
-                for (var i=0; i<this.resultsData.length; i++) {
-                    let subArray = [];
-                    for (var j=0; j<this.tableHeaders.length; j++) {
-                        subArray.push(this.resultsData[i][this.tableHeaders[j]]);
-                    }
-                    resultsArray.push(subArray);
-                }
-
-                return resultsArray;
-            }
-        },
         hasNext: function() {
-            return this.$store.state.query.hasNext;
+            return this.$store.state.data.currentTable.hasNext;
         },
         hasPrev: function() {
-            return this.$store.state.query.hasPrev;
+            return this.$store.state.data.currentTable.hasPrev;
         },
         crudLabel: function() {
-            return this.$store.state.table.crudLabel;
+            if (["Parts", "Suppliers"].includes(this.$store.state.global.shownView)) {
+                return "Edit";
+            } else {
+                return "View";
+            }
+        },
+        hasNew: function() {
+            if (["Parts", "Suppliers", "Sales", "Categories"].includes(this.$store.state.global.shownView)) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        tableHeaders: function() {
+            if (this.$store.state.data.currentTable.result.length == 0) {
+                return [];
+            } else {
+                // Get sorted list of items
+                let firstItem = this.$store.state.data.currentTable.result[0];
+                let sortedIndexes = this.sortTableRows(firstItem);
+
+                // Return array of headers
+                let headerArray = [];
+                for (var i=0; i<sortedIndexes.length; i++) {
+                    headerArray.push(firstItem[sortedIndexes[i]]["label"]);
+                }
+
+                return headerArray;
+            }
+        },
+        tableRows: function() {
+            if (this.$store.state.data.currentTable.result.length == 0) {
+                return [];
+            } else {
+                console.log(this.$store.state.data.currentTable.result);
+
+                // Get sorted list of items
+                let firstItem = this.$store.state.data.currentTable.result[0];
+                let sortedIndexes = this.sortTableRows(firstItem);
+
+                // Array of arrays of values
+                let currentRows = [];
+                for (var i=0; i<this.$store.state.data.currentTable.result.length; i++) {
+                    let currentItem = this.$store.state.data.currentTable.result[i];
+                    let rowList = [];
+                    for (var j=0; j<sortedIndexes.length; j++) {
+                        rowList.push(currentItem[sortedIndexes[j]]["value"]);
+                    }
+                    currentRows.push(rowList);
+                }
+
+                return currentRows;
+            }
         }
+    },
+    created() {
+        bus.$on("tableDataChange", ($event) => {
+            // Change current table data
+            let shownView = this.$store.state.global.shownView.toLowerCase();
+            let currentTableData;
+
+            /*
+            bus.$emit("showLoading", "Contacting Server");
+            axios.post(this.$store.state.query.queryRoute, {
+                query: searchInput
+            }).then((response) => {
+                this.$store.commit("setHasNext", response["data"]["result"]["has_next"]);
+                this.$store.commit("setHasPrev", response["data"]["result"]["has_prev"]);
+                this.resultsData = response["data"]["result"]["query_result"];
+                this.$store.commit("clearCrudList");
+
+                // Populate Crud list and set table row names
+                this.populateCrudList();
+            }).catch((error) => {
+                bus.$emit("showWarning", error.response.data);
+            }).finally(() => {
+                bus.$emit("hideLoading");
+            });
+            */
+        });
     }
 }
 </script>

@@ -10,11 +10,12 @@ import bleach
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
 from flask_bcrypt import Bcrypt
+from marshmallow import Schema, fields, ValidationError, pre_load, validates_schema
 
 from ..models import (
     db, Product, Category, ProductCategory,
     Sale, Order, Customer, Supplier)
-from . import CustomValidator, clean_data
+from . import CustomValidator, clean_data, process_result
 
 bcrypt = Bcrypt()
 
@@ -27,47 +28,164 @@ edit_blueprint = Blueprint(
 )
 
 
+# Validation Schemas
+class EditPartSchema(Schema):
+    id = fields.Integer()
+    name = fields.String()
+    supplier_id = fields.Integer()
+    units_in_stock = fields.Integer()
+    unit_price = fields.Decimal()
+    part_number = fields.String()
+    image_name = fields.String()
+    image = fields.String()
+    product_categories = fields.List(fields.Integer())
+
+    # Handle conditional required
+    @validates_schema
+    def conditional_required(self, data):
+        if ("id" not in data or data["id"] is None) and "name" not in data:
+            raise ValidationError("Name required for new items.")
+
+    # Bleach strings
+    @pre_load
+    def bleach_strings(self, data):
+        for k in data:
+            if isinstance(data[k], str):
+                data[k] = bleach.clean(data[k])
+
+
+class EditSupplierSchema(Schema):
+    id = fields.Integer()
+    name = fields.String()
+    contact_name = fields.String()
+    contact_title = fields.String()
+    address = fields.String()
+    city = fields.String()
+    zip_code = fields.String()
+    state = fields.String()
+    phone = fields.String()
+    contact_phone = fields.String()
+    contact_email = fields.String()
+
+    # Handle conditional required
+    @validates_schema
+    def conditional_required(self, data):
+        if ("id" not in data or data["id"] is None) and "name" not in data:
+            raise ValidationError("Name required for new items.")
+
+    # Bleach strings
+    @pre_load
+    def bleach_strings(self, data):
+        for k in data:
+            if isinstance(data[k], str):
+                data[k] = bleach.clean(data[k])
+
+
+class EditTransactionsSchema(Schema):
+    id = fields.Integer()
+    sale_id = fields.Integer()
+    customer_id = fields.Integer()
+
+    # Handle conditional required
+    @validates_schema
+    def conditional_required(self, data):
+        if ("id" not in data or data["id"] is None) and ("sale_id" not in data and "customer_id" not in data):
+            raise ValidationError("sale_id and customer_id required for new items.")
+
+    # Bleach strings
+    @pre_load
+    def bleach_strings(self, data):
+        for k in data:
+            if isinstance(data[k], str):
+                data[k] = bleach.clean(data[k])
+
+
+class EditCustomersSchema(Schema):
+    id = fields.Integer()
+    first_name = fields.String()
+    last_name = fields.String()
+    address = fields.String()
+    city = fields.String()
+    state = fields.String()
+    zip_code = fields.String()
+    phone = fields.String()
+    email = fields.String()
+    password_hash = fields.String()
+
+    # Handle conditional required
+    @validates_schema
+    def conditional_required(self, data):
+        if ("id" not in data or data["id"] is None) and ("email" not in data and "password_hash" not in data):
+            raise ValidationError("email and password_hash required for new items.")
+
+    # Bleach strings
+    @pre_load
+    def bleach_strings(self, data):
+        for k in data:
+            if isinstance(data[k], str):
+                data[k] = bleach.clean(data[k])
+
+
+class EditSaleSchema(Schema):
+    id = fields.Integer()
+    product_id = fields.Integer()
+    price = fields.Decimal()
+    delete = fields.Boolean()
+
+    # Handle conditional required
+    @validates_schema
+    def conditional_required(self, data):
+        if ("id" not in data or data["id"] is None) and ("product_id" not in data and "price" not in data):
+            raise ValidationError("product_id and price required for new items.")
+
+    # Bleach strings
+    @pre_load
+    def bleach_strings(self, data):
+        for k in data:
+            if isinstance(data[k], str):
+                data[k] = bleach.clean(data[k])
+
+
+class EditCategorySchema(Schema):
+    id = fields.Integer()
+    name = fields.String()
+    description = fields.String()
+    delete = fields.Boolean()
+
+    # Handle conditional required
+    @validates_schema
+    def conditional_required(self, data):
+        if ("id" not in data or data["id"] is None) and "name" not in data:
+            raise ValidationError("name required for new items.")
+
+    # Bleach strings
+    @pre_load
+    def bleach_strings(self, data):
+        for k in data:
+            if isinstance(data[k], str):
+                data[k] = bleach.clean(data[k])
+
+
 @edit_blueprint.route("/edit_part/", methods=["POST"])
-#@login_required
+@login_required
 def edit_part():
+    return "Saving is disabled in demo mode", 400
     """Edit or create the Product object specified."""
     # Get data and clean based on schema. Validate.
     data = request.get_json().get("modifications")
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "name": {
-                "type": "string"
-            },
-            "supplier_id": {
-                "type": "integer"
-            },
-            "units_in_stock": {
-                "type": "integer"
-            },
-            "unit_price": {
-                "type": "string"
-            },
-            "part_number": {
-                "type": "string"
-            }
-        }
-    }
+    try:
+        return_data = EditPartSchema().load(data)
+        # Return silent errors
+        if len(return_data.errors) > 0:
+            raise ValidationError(next(iter(return_data.errors.values()))[0])
+        data = return_data.data
+    except ValidationError as e:
+        return e.messages[0], 400
 
     if "id" not in data or data["id"] is None:
-        schema["required"] = ["name"]
-
-    cleaned_data = clean_data(data, schema)
-
-    try:
-        CustomValidator(schema).validate(cleaned_data)
-    except Exception as e:
-        return e.message, 400
-
-    if "id" not in cleaned_data or cleaned_data["id"] is None:
         # Create new object. Requires name.
-        name = cleaned_data["name"]
+        name = data["name"]
 
         product_obj = Product(name)
         db.session.add(product_obj)
@@ -76,18 +194,16 @@ def edit_part():
         product_obj = db.session.query(
             Product
         ).filter_by(
-            id=cleaned_data["id"]
+            id=data["id"]
         ).first()
 
     # Iterate through and make modifications.
-    for k, v in cleaned_data.items():
+    for k, v in data.items():
         if k != "id":
-            if k not in ["image", "product_categories"]:
+            if k not in ["product_categories"]:
                 setattr(product_obj, k, v)
-            elif k == "image":
-                setattr(product_obj, k, bleach.clean(v["file"]))
-                setattr(product_obj, "image_name", bleach.clean(v["name"]))
             else:
+                #print("!")
                 # Handle product categories.
                 # They are hard deleted based on the modified data passed.
                 product_category_objs = db.session.query(
@@ -115,65 +231,31 @@ def edit_part():
     db.session.add(product_obj)
     db.session.commit()
 
-    return jsonify(result=product_obj.serialize)
+    result = process_result(product_obj, ["name"])
+
+    return jsonify(result=result)
 
 
 @edit_blueprint.route("/edit_supplier/", methods=["POST"])
-#@login_required
+@login_required
 def edit_supplier():
+    return "Saving is disabled in demo mode", 400
     """Edit or create the Supplier object specified."""
     # Get data and clean based on schema. Validate.
     data = request.get_json().get("modifications")
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "name": {
-                "type": "string"
-            },
-            "contact_name": {
-                "type": "string"
-            },
-            "contact_title": {
-                "type": "string"
-            },
-            "address": {
-                "type": "string"
-            },
-            "city": {
-                "type": "string"
-            },
-            "zip_code": {
-                "type": "string"
-            },
-            "state": {
-                "type": "string"
-            },
-            "phone": {
-                "type": "string"
-            },
-            "contact_phone": {
-                "type": "string"
-            },
-            "contact_email": {
-                "type": "string"
-            }
-        }
-    }
+    try:
+        return_data = EditSupplierSchema().load(data)
+        # Return silent errors
+        if len(return_data.errors) > 0:
+            raise ValidationError(next(iter(return_data.errors.values()))[0])
+        data = return_data.data
+    except ValidationError as e:
+        return e.messages[0], 400
 
     if "id" not in data or data["id"] is None:
-        schema["required"] = ["name"]
-
-    cleaned_data = clean_data(data, schema)
-
-    try:
-        CustomValidator(schema).validate(cleaned_data)
-    except Exception as e:
-        return e.message, 400
-
-    if "id" not in cleaned_data or cleaned_data["id"] is None:
         # Create new object. Requires name.
-        name = cleaned_data["name"]
+        name = data["name"]
 
         supplier_obj = Supplier(name)
         db.session.add(supplier_obj)
@@ -182,182 +264,132 @@ def edit_supplier():
         supplier_obj = db.session.query(
             Supplier
         ).filter_by(
-            id=cleaned_data["id"]
+            id=data["id"]
         ).first()
 
     # Iterate through and make modifications.
-    for k, v in cleaned_data.items():
+    for k, v in data.items():
         if k != "id":
             setattr(supplier_obj, k, v)
 
     db.session.add(supplier_obj)
     db.session.commit()
 
-    return jsonify(result=supplier_obj.serialize)
+    result = process_result(supplier_obj, ["name"])
+
+    return jsonify(result=result)
 
 
 @edit_blueprint.route("/edit_transactions/", methods=["POST"])
-#@login_required
+@login_required
 def edit_transactions():
+    return "Saving is disabled in demo mode", 400
     """Edit or create the Order object specified."""
     # Get data and clean based on schema. Validate.
     data = request.get_json().get("modifications")
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "sale_id": {
-                "type": "integer"
-            },
-            "customer_id": {
-                "type": "integer"
-            }
-        }
-    }
+    try:
+        return_data = EditTransactionsSchema().load(data)
+        # Return silent errors
+        if len(return_data.errors) > 0:
+            raise ValidationError(next(iter(return_data.errors.values()))[0])
+        data = return_data.data
+    except ValidationError as e:
+        return e.messages[0], 400
 
     if "id" not in data or data["id"] is None:
-        schema["required"] = ["sale_id", "customer_id"]
-
-    cleaned_data = clean_data(data, schema)
-
-    try:
-        CustomValidator(schema).validate(cleaned_data)
-    except Exception as e:
-        return e.message, 400
-
-    if "id" not in cleaned_data or cleaned_data["id"] is None:
         return "Creation of new orders not allowed", 400
     else:
         order_obj = db.session.query(
             Order
         ).filter_by(
-            id=cleaned_data["id"]
+            id=data["id"]
         ).first()
 
     # Iterate through and make modifications.
-    for k, v in cleaned_data.items():
+    for k, v in data.items():
         if k != "id":
             setattr(order_obj, k, v)
 
     db.session.add(order_obj)
     db.session.commit()
 
-    return jsonify(result=order_obj.serialize)
+    result = process_result(order_obj, ["sale_id", "customer_id"])
+
+    return jsonify(result=result)
 
 
 @edit_blueprint.route("/edit_customer/", methods=["POST"])
-#@login_required
+@login_required
 def edit_customer():
+    return "Saving is disabled in demo mode", 400
     """Edit or create the Customer object specified."""
     # Get data and clean based on schema. Validate.
     data = request.get_json().get("modifications")
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "first_name": {
-                "type": "string"
-            },
-            "last_name": {
-                "type": "string"
-            },
-            "address": {
-                "type": "string"
-            },
-            "city": {
-                "type": "string"
-            },
-            "state": {
-                "type": "string"
-            },
-            "zip_code": {
-                "type": "string"
-            },
-            "phone": {
-                "type": "string"
-            },
-            "email": {
-                "type": "string"
-            },
-            "password_hash": {
-                "type": "string"
-            }
-        }
-    }
+    try:
+        return_data = EditCustomersSchema().load(data)
+        # Return silent errors
+        if len(return_data.errors) > 0:
+            raise ValidationError(next(iter(return_data.errors.values()))[0])
+        data = return_data.data
+    except ValidationError as e:
+        return e.messages[0], 400
 
     if "id" not in data or data["id"] is None:
-        schema["required"] = ["email", "password_hash"]
-
-    cleaned_data = clean_data(data, schema)
-
-    try:
-        CustomValidator(schema).validate(cleaned_data)
-    except Exception as e:
-        return e.message, 400
-
-    if "id" not in cleaned_data or cleaned_data["id"] is None:
         return "Creation of new customers not allowed", 400
     else:
         customer_obj = db.session.query(
             Customer
         ).filter_by(
-            id=cleaned_data["id"]
+            id=data["id"]
         ).first()
 
     # Iterate through and make modifications.
-    for k, v in cleaned_data.items():
+    for k, v in data.items():
         if k != "id":
             setattr(customer_obj, k, v)
 
     db.session.add(customer_obj)
     db.session.commit()
 
-    return jsonify(result=customer_obj.serialize)
+    result = process_result(customer_obj, ["email", "password_hash"])
+
+    return jsonify(result=result)
+
 
 
 @edit_blueprint.route("/edit_sale/", methods=["POST"])
-#@login_required
+@login_required
 def edit_sale():
+    return "Saving is disabled in demo mode", 400
     """Edit or create the Sale object specified."""
     # Get data and clean based on schema. Validate.
     data = request.get_json().get("modifications")
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "product_id": {
-                "type": "integer"
-            },
-            "price": {
-                "type": "string"
-            }
-        }
-    }
+    try:
+        return_data = EditSaleSchema().load(data)
+        # Return silent errors
+        if len(return_data.errors) > 0:
+            raise ValidationError(next(iter(return_data.errors.values()))[0])
+        data = return_data.data
+    except ValidationError as e:
+        return e.messages[0], 400
 
     if "id" not in data or data["id"] is None:
-        schema["required"] = ["product_id", "price"]
-
-    cleaned_data = clean_data(data, schema)
-
-    try:
-        CustomValidator(schema).validate(cleaned_data)
-    except Exception as e:
-        return e.message, 400
-
-    if "id" not in cleaned_data or cleaned_data["id"] is None:
         # Create new object.
-        sale_obj = Sale(cleaned_data["product_id"], cleaned_data["price"])
+        sale_obj = Sale(data["product_id"], data["price"])
         db.session.add(sale_obj)
         db.session.commit()
     else:
         sale_obj = db.session.query(
             Sale
         ).filter_by(
-            id=cleaned_data["id"]
+            id=data["id"]
         ).first()
 
     # Iterate through and make modifications.
-    for k, v in cleaned_data.items():
+    for k, v in data.items():
         if k != "id":
             if k != "delete":
                 setattr(sale_obj, k, v)
@@ -380,48 +412,39 @@ def edit_sale():
         Sale.id != sale_obj.id,
         Sale.timestamp_ended == None
     ).all()
-    print(existing_sales)
+    #print(existing_sales)
 
     for ind_sale in existing_sales:
         ind_sale.timestamp_ended = datetime.datetime.utcnow()
         db.session.add(ind_sale)
         db.session.commit()
 
-    return jsonify(result=sale_obj.serialize)
+    result = process_result(sale_obj, ["product_id", "price"])
+
+    return jsonify(result=result)
+
 
 
 @edit_blueprint.route("/edit_category/", methods=["POST"])
-#@login_required
+@login_required
 def edit_category():
+    return "Saving is disabled in demo mode", 400
     """Edit or create the Category object specified."""
     # Get data and clean based on schema. Validate.
     data = request.get_json().get("modifications")
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "name": {
-                "type": "string"
-            },
-            "description": {
-                "type": "string"
-            }
-        }
-    }
+    try:
+        return_data = EditCategorySchema().load(data)
+        # Return silent errors
+        if len(return_data.errors) > 0:
+            raise ValidationError(next(iter(return_data.errors.values()))[0])
+        data = return_data.data
+    except ValidationError as e:
+        return e.messages[0], 400
 
     if "id" not in data or data["id"] is None:
-        schema["required"] = ["name"]
-
-    cleaned_data = clean_data(data, schema)
-
-    try:
-        CustomValidator(schema).validate(cleaned_data)
-    except Exception as e:
-        return e.message, 400
-
-    if "id" not in cleaned_data or cleaned_data["id"] is None:
         # Create new object. Requires name.
-        name = cleaned_data["name"]
+        name = data["name"]
 
         category_obj = Category(name)
         db.session.add(category_obj)
@@ -430,11 +453,11 @@ def edit_category():
         category_obj = db.session.query(
             Category
         ).filter_by(
-            id=cleaned_data["id"]
+            id=data["id"]
         ).first()
 
     # Iterate through and make modifications.
-    for k, v in cleaned_data.items():
+    for k, v in data.items():
         if k != "id":
             if k != "delete":
                 setattr(category_obj, k, v)
@@ -451,4 +474,6 @@ def edit_category():
     db.session.add(category_obj)
     db.session.commit()
 
-    return jsonify(result=category_obj.serialize)
+    result = process_result(category_obj, ["name"])
+
+    return jsonify(result=result)

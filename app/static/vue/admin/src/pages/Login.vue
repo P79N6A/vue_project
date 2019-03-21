@@ -7,7 +7,7 @@
             <span class="login__error" v-if="serverErrors !== null">
                 {{ serverErrors }}
             </span>
-            <span class="login__error" v-if="errors.any()">
+            <span class="login__error" v-if="errors && errors.any()">
                 {{ errors.all()[0] }}
             </span>
             <input 
@@ -55,7 +55,7 @@ export default {
     methods: {
         loginUser: function(event) {
             this.$validator.validateAll().then(result => {
-                if (this.errors.any()) {
+                if (this.errors && this.errors.any()) {
                     return;
                 }
 

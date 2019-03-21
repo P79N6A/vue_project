@@ -1,0 +1,8 @@
+require('jsdom-global')();
+//require("vee-validate");
+
+// https://github.com/vuejs/vue-test-utils/issues/936
+// https://github.com/vuejs/vue-cli/issues/2128
+window.Date = Date;
+
+global.expect = require('expect');

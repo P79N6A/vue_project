@@ -71,6 +71,7 @@ export default {
     },
     methods: {
         submitSearch(searchInput) {
+            /*
             bus.$emit("showLoading", "Contacting Server");
             axios.post(this.$store.state.query.queryRoute, {
                 query: searchInput
@@ -87,6 +88,10 @@ export default {
             }).finally(() => {
                 bus.$emit("hideLoading");
             });
+            */
+            let shownView = this.$store.state.global.shownView;
+
+            this.$store.dispatch("update".concat(shownView), searchInput);
         },
         populateCrudList() {
             let shownView = this.$store.state.global.shownView;
@@ -179,7 +184,7 @@ export default {
     },
     computed: {
         isCommonView: function() {
-            return ["Part", "Supplier", "Transactions", "Customers", "Sales", "Categories"].includes(this.$store.state.global.shownView);
+            return ["Parts", "Suppliers", "Transactions", "Sales", "Customers", "Categories"].includes(this.$store.state.global.shownView);
         }
     },
     beforeCreate() {
@@ -190,14 +195,27 @@ export default {
     created() {
         bus.$on("mainViewChange", (data) => {
             let shownView = data;
+
             let tableInfo = TABLES[shownView];
 
             this.$store.commit("setShownView", data);
 
-            if (["Part", "Supplier", "Transactions", "Sales", "Customers", "Categories"].includes(data)) {
+            if (["Parts", "Suppliers", "Transactions", "Sales", "Customers", "Categories"].includes(data)) {
                 // clear old info
                 this.$store.commit("clearCrudList");
                 this.$store.commit("setTableRowNames", []);
+
+
+                this.$store.commit("setQueryOffset", 0);
+
+                // Update store
+                this.$store.dispatch("update".concat(shownView), {
+                    "offset": this.$store.state.query.queryOffset,
+                    "sort_by": "id",
+                    "limit": "10",
+                    "search": "",
+                    "active": false
+                });
 
                 // apply query filter and button statuses
                 let queryFilter = {};
@@ -209,19 +227,21 @@ export default {
                 }
 
                 this.$store.commit("setQueryFilters", queryFilter);
-                this.$store.commit("setCrudLabel", tableInfo["crudLabel"]);
-                this.$store.commit("setHasNew", tableInfo["hasNew"]);
-                this.$store.commit("setHasEdit", tableInfo["hasEdit"]);
-                this.$store.commit("resetQuery");
-                this.$store.commit("setHasDelete", tableInfo["hasDelete"]);
-                this.$store.commit("setDeleteLabel", tableInfo["deleteLabel"]);
-                this.$store.commit("setHasUndelete", tableInfo["hasUndelete"]);
-                this.$store.commit("setUndeleteLabel", tableInfo["undeleteLabel"]);
-                this.$store.commit("setQueryRoute", tableInfo["queryRoute"]);
-
+                
+                //this.$store.commit("setQueryRoute", tableInfo["queryRoute"]);
+                //this.$store.commit("setCrudLabel", tableInfo["crudLabel"]);
+                //this.$store.commit("setHasNew", tableInfo["hasNew"]);
+                //this.$store.commit("setHasEdit", tableInfo["hasEdit"]);
+                //this.$store.commit("resetQuery");
+                //this.$store.commit("setHasDelete", tableInfo["hasDelete"]);
+                //this.$store.commit("setDeleteLabel", tableInfo["deleteLabel"]);
+                //this.$store.commit("setHasUndelete", tableInfo["hasUndelete"]);
+                //this.$store.commit("setUndeleteLabel", tableInfo["undeleteLabel"]);
+                /*
                 this.$nextTick(function() {
                     bus.$emit("runQuery");
-                });
+                }); 
+                */
             }
         });
         bus.$on("emptyCrud", () => {
@@ -382,12 +402,14 @@ export default {
             this.showLoadingPopup = true;
         });
         bus.$on("popCrud", (crudData) => {
+            console.log(crudData);
             this.crudData = crudData;
         });
         bus.$on("showCrud", () => {
             let shownView = this.$store.state.global.shownView;
 
             // Get Reviews for Part and Customers
+            /*
             if ((shownView === "Part" || shownView === "Customers") && this.crudData !== null && this.crudData.id !== null) {
                 let queryObj = {
                     "sort_by": "date",
@@ -416,6 +438,10 @@ export default {
                 this.showCrud = true;
                 bus.$emit("resetValues");
             }
+            */
+            this.reviewData = [];
+            this.showCrud = true;
+            bus.$emit("resetValues");
         });
         bus.$on("hideCrud", () => {
             this.showCrud = false;

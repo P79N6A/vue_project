@@ -7,9 +7,11 @@ Any route that doesn't fit in edits.py or queries.py goes here.
 from flask import Blueprint, render_template, request, jsonify, session
 from flask_login import login_required, login_user, logout_user, current_user
 from flask_bcrypt import Bcrypt
+from marshmallow import Schema, fields, ValidationError, pre_load, validates_schema
+import bleach
 
 from ..models import db, Employee, Review, Supplier, Product, Category
-from . import CustomValidator, clean_data
+from . import CustomValidator, clean_data, process_result
 
 bcrypt = Bcrypt()
 
@@ -21,6 +23,42 @@ misc_blueprint = Blueprint(
     template_folder="../static/vue/admin"
 )
 
+# Validation Schemas
+class LoginSchema(Schema):
+    email = fields.String(required=True)
+    password = fields.String(required=True)
+
+    # Bleach strings
+    @pre_load
+    def bleach_strings(self, data):
+        for k in data:
+            if isinstance(data[k], str):
+                data[k] = bleach.clean(data[k])
+
+
+class EmployeeSchema(Schema):
+    email = fields.String()
+    account_image = fields.String()
+    remember_me = fields.Boolean(required=True)
+
+    # Bleach strings
+    @pre_load
+    def bleach_strings(self, data):
+        for k in data:
+            if isinstance(data[k], str):
+                data[k] = bleach.clean(data[k])
+
+
+class ReviewSchema(Schema):
+    id = fields.Integer(required=True)
+
+    # Bleach strings
+    @pre_load
+    def bleach_strings(self, data):
+        for k in data:
+            if isinstance(data[k], str):
+                data[k] = bleach.clean(data[k])
+
 
 @misc_blueprint.route("/login/", methods=["GET", "POST"])
 def login():
@@ -28,34 +66,20 @@ def login():
     if request.method == "GET":
         return render_template("index.html")
     elif request.method == "POST":
-        return "success"    # Auth Disable
+        #return "success"    # Auth Disable
         # Get data and clean based on schema. Validate.
         data = request.get_json()
-
-        schema = {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "not_empty": True
-                },
-                "password": {
-                    "type": "string",
-                    "not_empty": True
-                }
-            },
-            "required": ["email", "password"]
-        }
-
-        cleaned_data = clean_data(data, schema)
-
         try:
-            CustomValidator(schema).validate(cleaned_data)
-        except Exception as e:
-            return e.message, 400
+            return_data = LoginSchema().load(data)
+            # Return silent errors
+            if len(return_data.errors) > 0:
+                raise ValidationError(next(iter(return_data.errors.values()))[0])
+            data = return_data.data
+        except ValidationError as e:
+            return e.messages[0], 400
 
-        email = cleaned_data["email"]
-        password = cleaned_data["password"]
+        email = data["email"]
+        password = data["password"]
 
         # Attempt to get user and check password.
         this_user = db.session.query(Employee).filter_by(email=email).first()
@@ -95,21 +119,32 @@ def index(path):
 
 
 @misc_blueprint.route("/get_employee_info/", methods=["POST"])
-#@login_required
+@login_required
 def query_employee():
     # Non-auth employee data
-    return jsonify(result={"email": "username@email.com"})
+    #return jsonify(result={"email": "username@email.com"})
     """Return logged-in employee data."""
-    return jsonify(result=current_user.serialize)
+    processed_user = process_result(current_user, exclude_list=["password_hash", "is_authenticated", "is_active", "is_anonymous"])
+
+    return jsonify(result=processed_user)
 
 
 @misc_blueprint.route("/update_employee_info/", methods=["POST"])
-#@login_required
+@login_required
 def update_employee_info():
-    return "Updating disabled in non-auth mode", 400    # Auth Disable
+    #return "Updating disabled in non-auth mode", 400    # Auth Disable
     """Update employee information."""
     # Get data and clean based on schema. Validate.
     data = request.get_json()
+
+    try:
+        return_data = EmployeeSchema().load(data)
+        # Return silent errors
+        if len(return_data.errors) > 0:
+            raise ValidationError(next(iter(return_data.errors.values()))[0])
+        data = return_data.data
+    except ValidationError as e:
+        return e.messages[0], 400
 
     employee_obj = db.session.query(
         Employee
@@ -117,31 +152,8 @@ def update_employee_info():
         id=current_user.id
     ).first()
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "account_image": {
-                "type": "string"
-            },
-            "email": {
-                "type": "integer"
-            },
-            "remember_me": {
-                "type": "boolean"
-            }
-        },
-        "required": ["remember_me"]
-    }
-
-    cleaned_data = clean_data(data, schema)
-
-    try:
-        CustomValidator(schema).validate(cleaned_data)
-    except Exception as e:
-        return e.message, 400
-
     # Iterate through and make modifications.
-    for k, v in cleaned_data.items():
+    for k, v in data.items():
         if k != "remember_me":
             setattr(employee_obj, k, v)
 
@@ -149,25 +161,42 @@ def update_employee_info():
     db.session.commit()
 
     # Remember me handling and relogging.
-    if cleaned_data["remember_me"] is True:
+    if data["remember_me"] is True:
         user_id = current_user.id
         this_user = db.session.query(Employee).filter_by(id=user_id).first()
         logout_user()
+        session["email"] = this_user.email
+        session["employee_id"] = this_user.id
         login_user(this_user, remember=True)
     else:
         user_id = current_user.id
         this_user = db.session.query(Employee).filter_by(id=user_id).first()
         logout_user()
+        session["email"] = this_user.email
+        session["employee_id"] = this_user.id
         login_user(this_user)
 
-    return jsonify(result=employee_obj.serialize)
+    processed_user = process_result(current_user, exclude_list=["password_hash", "is_authenticated", "is_active", "is_anonymous"])
+
+    return jsonify(result=processed_user)
 
 
 @misc_blueprint.route("/toggle_review/", methods=["POST"])
-#@login_required
+@login_required
 def toggle_review():
     """Toggles whether indicated review is shown."""
-    review_id = request.get_json().get("id")
+    data = request.get_json()
+
+    try:
+        return_data = ReviewSchema().load(data)
+        # Return silent errors
+        if len(return_data.errors) > 0:
+            raise ValidationError(next(iter(return_data.errors.values()))[0])
+        data = return_data.data
+    except ValidationError as e:
+        return e.messages[0], 400
+
+    review_id = data["id"]
 
     review_obj = db.session.query(Review).filter_by(id=review_id).first()
 

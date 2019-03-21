@@ -26,6 +26,7 @@ export default {
     },
     methods: {
         logout: function(event) {
+            /*
             bus.$emit("showLoading", "Contacting Server");
             axios.post("/logout/").then((response) => {
                 location.assign("/");
@@ -34,6 +35,7 @@ export default {
             }).finally(() => {
                 bus.$emit("hideLoading");
             });
+            */
         }
     }
 }

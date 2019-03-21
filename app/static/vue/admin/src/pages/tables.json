@@ -1,5 +1,5 @@
 {
-    "Part": {
+    "Parts": {
         "viewObject": "PartView",
         "nameValue": "name",
         "tableKeys": ["id", "name", "part_number", "supplier_name", "unit_price", "units_in_stock", "image_name"],
@@ -65,7 +65,7 @@
         "undeleteLabel": "",
         "queryRoute": "/query_transactions/"
     },
-    "Supplier": {
+    "Suppliers": {
         "viewObject": "SupplierView",
         "nameValue": "name",
         "tableKeys": ["id", "name", "phone", "address", "city", "state", "zip_code", "contact_name"],

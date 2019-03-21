@@ -13,8 +13,7 @@ db = SQLAlchemy()
 # Uncomment out all before alembic model update.
 # Also remove aliasing from session tables.
 
-"""
-Uncomment to not use session tables.
+# Uncomment to not use session tables.
 
 from admin.app.models.category import Category
 from admin.app.models.product import Product
@@ -37,3 +36,5 @@ from admin.app.models.session_models.customer import CustomerSession as Customer
 from admin.app.models.session_models.review import ReviewSession as Review
 from admin.app.models.session_models.supplier import SupplierSession as Supplier
 from admin.app.models.session_models.employee import EmployeeSession as Employee
+
+"""
